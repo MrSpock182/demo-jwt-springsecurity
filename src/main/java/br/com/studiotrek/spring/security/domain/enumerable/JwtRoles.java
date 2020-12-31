@@ -1,4 +1,4 @@
-package br.com.studiotrek.spring.security.dto;
+package br.com.studiotrek.spring.security.domain.enumerable;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import org.springframework.security.core.GrantedAuthority;

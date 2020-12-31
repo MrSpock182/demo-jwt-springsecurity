@@ -1,31 +1,35 @@
-package br.com.studiotrek.spring.security.component.implementation;
+package br.com.studiotrek.spring.security.service.implementation;
 
-import br.com.studiotrek.spring.security.component.SpringAuthentication;
-import br.com.studiotrek.spring.security.dto.JwtRequest;
+import br.com.studiotrek.spring.security.domain.orm.User;
+import br.com.studiotrek.spring.security.service.SpringAuthenticationService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
-public class SpringAuthenticationWithJwt implements SpringAuthentication {
+@Service
+public class SpringAuthenticationServiceImpl implements SpringAuthenticationService {
 
-    @Value("${jwt.secret}")
-    private String secret;
+    private final String secret;
+    private final String expiration;
 
-    @Value("${jwt.expiration}")
-    private String expiration;
+    public SpringAuthenticationServiceImpl(final @Value("${jwt.secret}") String secret,
+            final @Value("${jwt.expiration}") String expiration) {
+        this.secret = secret;
+        this.expiration = expiration;
+    }
 
     @Override
     public Claims getAllClaimsFromToken(String token) {
-        return Jwts.parser().setSigningKey(Base64.getEncoder().encodeToString(secret.getBytes())).parseClaimsJws(token).getBody();
+        return Jwts.parser().setSigningKey(Base64.getEncoder()
+                .encodeToString(secret.getBytes())).parseClaimsJws(token).getBody();
     }
 
     @Override
@@ -39,22 +43,19 @@ public class SpringAuthenticationWithJwt implements SpringAuthentication {
     }
 
     private Boolean isTokenExpired(String token) {
-        final Date expiration = getExpirationDateFromToken(token);
-        return expiration.before(new Date());
+        return getExpirationDateFromToken(token).before(new Date());
     }
 
     @Override
-    public String generateToken(JwtRequest user) {
+    public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", user.getRoles());
         return String.format("Bearer %s", doGenerateToken(claims, user.getUsername()));
     }
 
     private String doGenerateToken(Map<String, Object> claims, String username) {
-        Long expirationTimeLong = Long.parseLong(expiration);
-
         final Date createdDate = new Date();
-        final Date expirationDate = new Date(createdDate.getTime() + expirationTimeLong * 1000);
+        final Date expirationDate = new Date(createdDate.getTime() + Long.parseLong(expiration) * 1000);
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(username)

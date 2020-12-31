@@ -1,8 +1,7 @@
 package br.com.studiotrek.spring.security.configuration;
 
-import br.com.studiotrek.spring.security.component.implementation.AuthenticationManagerWithJwt;
-import br.com.studiotrek.spring.security.component.implementation.AuthenticationEntryPointWithJwt;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,14 +21,20 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    @Autowired
-    private AuthenticationManagerWithJwt manager;
+    private final String uriAuth;
+    private final AuthenticationManagerWithJwt manager;
+    private final UserDetailsService jwtUserDetailsService;
+    private final AuthenticationEntryPointWithJwt jwtAuthenticationEntryPoint;
 
-    @Autowired
-    private UserDetailsService jwtUserDetailsService;
-
-    @Autowired
-    private AuthenticationEntryPointWithJwt jwtAuthenticationEntryPoint;
+    public WebSecurityConfiguration(final @Value("${uri.authenticate}") String uriAuth,
+            final AuthenticationManagerWithJwt manager,
+            final UserDetailsService jwtUserDetailsService,
+            final AuthenticationEntryPointWithJwt jwtAuthenticationEntryPoint) {
+        this.uriAuth = uriAuth;
+        this.manager = manager;
+        this.jwtUserDetailsService = jwtUserDetailsService;
+        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
+    }
 
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
@@ -53,14 +58,13 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .csrf()
                 .disable()
                 .authorizeRequests()
-                .antMatchers("/authenticate").permitAll().anyRequest().authenticated()
+                .antMatchers(uriAuth).permitAll().anyRequest().authenticated()
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
         httpSecurity.addFilterBefore(manager, UsernamePasswordAuthenticationFilter.class);
     }
 
