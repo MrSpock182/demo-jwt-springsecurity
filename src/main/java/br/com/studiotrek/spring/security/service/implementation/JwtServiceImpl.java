@@ -1,7 +1,7 @@
 package br.com.studiotrek.spring.security.service.implementation;
 
 import br.com.studiotrek.spring.security.domain.orm.User;
-import br.com.studiotrek.spring.security.service.SpringAuthenticationService;
+import br.com.studiotrek.spring.security.service.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -15,12 +15,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class SpringAuthenticationServiceImpl implements SpringAuthenticationService {
+public class JwtServiceImpl implements JwtService {
 
     private final String secret;
     private final String expiration;
 
-    public SpringAuthenticationServiceImpl(final @Value("${jwt.secret}") String secret,
+    public JwtServiceImpl(final @Value("${jwt.secret}") String secret,
             final @Value("${jwt.expiration}") String expiration) {
         this.secret = secret;
         this.expiration = expiration;

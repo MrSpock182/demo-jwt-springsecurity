@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Date;
 
-public interface SpringAuthenticationService {
+public interface JwtService {
     Claims getAllClaimsFromToken(String token);
 
     String getUsernameFromToken(String token);

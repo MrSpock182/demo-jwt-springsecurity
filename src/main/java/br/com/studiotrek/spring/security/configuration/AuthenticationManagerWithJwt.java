@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import br.com.studiotrek.spring.security.domain.enumerable.JwtRoles;
-import br.com.studiotrek.spring.security.service.SpringAuthenticationService;
+import br.com.studiotrek.spring.security.service.JwtService;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -25,10 +25,10 @@ import javax.servlet.http.HttpServletResponse;
 public class AuthenticationManagerWithJwt extends OncePerRequestFilter {
 
     private final String uriAuth;
-    private final SpringAuthenticationService authService;
+    private final JwtService authService;
 
     public AuthenticationManagerWithJwt(final @Value("${uri.authenticate}") String uriAuth,
-            final SpringAuthenticationService authService) {
+            final JwtService authService) {
         this.uriAuth = uriAuth;
         this.authService = authService;
     }
