@@ -1,13 +1,18 @@
 package br.com.studiotrek.spring.security.configuration;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import br.com.studiotrek.spring.security.domain.enumerable.JwtRoles;
 import br.com.studiotrek.spring.security.service.SpringAuthenticationService;
+import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,14 +26,11 @@ public class AuthenticationManagerWithJwt extends OncePerRequestFilter {
 
     private final String uriAuth;
     private final SpringAuthenticationService authService;
-    private final UserDetailsServiceWithJwt service;
 
     public AuthenticationManagerWithJwt(final @Value("${uri.authenticate}") String uriAuth,
-            final SpringAuthenticationService auth,
-            final UserDetailsServiceWithJwt service) {
+            final SpringAuthenticationService authService) {
         this.uriAuth = uriAuth;
-        this.authService = auth;
-        this.service = service;
+        this.authService = authService;
     }
 
     @Override
@@ -44,21 +46,20 @@ public class AuthenticationManagerWithJwt extends OncePerRequestFilter {
         final String token = getToken(request.getHeader("Authorization"));
         final String username = getUsername(token);
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = service.loadUserByUsername(username);
-            if (Boolean.TRUE.equals(authService.validateToken(token, userDetails))) {
+        if (Boolean.TRUE.equals(authService.validateToken(token))) {
+            Claims claims = authService.getAllClaimsFromToken(token);
+            List<String> rolesMap = claims.get("role", List.class);
+            List<JwtRoles> roles = new ArrayList<>();
+            rolesMap.forEach(map -> roles.add(JwtRoles.valueOf(map)));
 
-                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities());
-
-                usernamePasswordAuthenticationToken
-                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-            }
+            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
+                    username,
+                    null,
+                    roles.stream().map(authority -> new SimpleGrantedAuthority(authority.name())).collect(Collectors.toList())
+            );
+            usernamePasswordAuthenticationToken
+                    .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
         }
     }
 

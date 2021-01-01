@@ -1,5 +1,6 @@
 package br.com.studiotrek.spring.security.configuration;
 
+import br.com.studiotrek.spring.security.service.AuthUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -23,34 +24,26 @@ public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final String uriAuth;
     private final AuthenticationManagerWithJwt manager;
-    private final UserDetailsService jwtUserDetailsService;
     private final AuthenticationEntryPointWithJwt jwtAuthenticationEntryPoint;
 
     public WebSecurityConfiguration(final @Value("${uri.authenticate}") String uriAuth,
             final AuthenticationManagerWithJwt manager,
-            final UserDetailsService jwtUserDetailsService,
             final AuthenticationEntryPointWithJwt jwtAuthenticationEntryPoint) {
         this.uriAuth = uriAuth;
         this.manager = manager;
-        this.jwtUserDetailsService = jwtUserDetailsService;
         this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
     }
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
-    }
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
-    }
+//    @Bean
+//    @Override
+//    public AuthenticationManager authenticationManagerBean() throws Exception {
+//        return super.authenticationManagerBean();
+//    }
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {

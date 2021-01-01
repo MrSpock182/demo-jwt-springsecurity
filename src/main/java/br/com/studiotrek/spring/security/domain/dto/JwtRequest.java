@@ -2,15 +2,19 @@ package br.com.studiotrek.spring.security.domain.dto;
 
 import br.com.studiotrek.spring.security.domain.enumerable.JwtRoles;
 
+import java.util.List;
+
 public class JwtRequest {
     private final String username;
     private final String password;
-    private final JwtRoles role;
+    private final List<JwtRoles> roles;
 
-    public JwtRequest(String username, String password, JwtRoles role) {
+    public JwtRequest(final String username,
+            final String password,
+            final List<JwtRoles> roles) {
         this.username = username;
         this.password = password;
-        this.role = role;
+        this.roles = roles;
     }
 
     public String getUsername() {
@@ -21,7 +25,7 @@ public class JwtRequest {
         return password;
     }
 
-    public JwtRoles getRole() {
-        return role;
+    public List<JwtRoles> getRoles() {
+        return roles;
     }
 }

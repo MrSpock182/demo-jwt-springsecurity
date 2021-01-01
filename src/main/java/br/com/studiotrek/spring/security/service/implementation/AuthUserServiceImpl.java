@@ -5,8 +5,6 @@ import br.com.studiotrek.spring.security.domain.orm.User;
 import br.com.studiotrek.spring.security.service.AuthUserService;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-
 @Service
 public class AuthUserServiceImpl implements AuthUserService {
 
@@ -14,6 +12,6 @@ public class AuthUserServiceImpl implements AuthUserService {
 		return new User(request.getUsername(),
 				request.getPassword(),
 				true,
-				Collections.singletonList(request.getRole()));
+				request.getRoles());
 	}
 }
